@@ -16,29 +16,29 @@ PRODUCTION_FLAGS=
 # ----------------------------------------------------------------------------
 # PRODUCTION BUILD SETTINGS
 # ----------------------------------------------------------------------------
-MINIFY=1 # should code be minified with uglify when building for production
+MINIFY=1 # should code be minified with uglify when building for production?
 
 
 
-ifdef MINIFY
+ifeq (MINIFY, 1)
 	PRODUCTION_FLAGS += -g uglifyify
 endif
-
-BROWSERIFY=./node_modules/.bin/browserify
-WATCHIFY=./node_modules/.bin/watchify
-NPM=npm
 
 # Enable sourcemap with "make sourcemap=1"
 ifdef sourcemap
 	FLAGS += --debug
 endif
 
-# Add any babel transforms
+# Babel transforms need a special flag
 ifdef TRANSFORMS
 	FLAGS += -t [babelify]
 endif
 
 
+
+BROWSERIFY=./node_modules/.bin/browserify
+WATCHIFY=./node_modules/.bin/watchify
+NPM=npm
 
 # default to a dev build
 all: build-dev
@@ -77,14 +77,17 @@ node_modules/uglifyify:
 
 
 
+# Create a new dev build of the given code.
 .PHONY: build-dev
 build-dev: $(ENTRY) node_modules $(BROWSERIFY) transforms
 	$(BROWSERIFY) $(FLAGS) -o $(TARGET) -- $<
 
-.PHONY: watch
-build: $(ENTRY) node_modules $(BROWSERIFY) transforms $(MINIFY:1=node_modules/uglifyify)
+# Create a new production build of the given code.
+.PHONY: build-release
+build-release: $(ENTRY) node_modules $(BROWSERIFY) transforms $($(MINIFY:1=node_modules/uglifyify):0=)
 	$(BROWSERIFY) $(FLAGS) $(PRODUCTION_FLAGS) -o $(TARGET) -- $<
 
+# Watch for changes and make builds on the fly.
 .PHONY: watch
 watch: $(ENTRY) node_modules $(WATCHIFY) transforms
 	$(WATCHIFY) --verbose $(FLAGS) -o $(TARGET) -- $<

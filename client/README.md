@@ -11,12 +11,14 @@ Browserify and Babel, build a bundle, and output it to the path `TARGET`.
 - `Uglify` (in the package `uglifyify`)
 
 ## Tasks
-- `make`: Create a new build of the `TARGET`. Before bundling, each module is transformed through
-  Babel and packaged with Browserify. On first run of `make`, all dependencies that are required for
-  the build process to complete are installed as devDependencies.
+- `make build-dev`: Create a new build of the `TARGET`. Before bundling, each module is transformed
+  through Babel and packaged with Browserify. On first run of `make`, all dependencies that are
+  required for the build process to complete are installed as devDependencies.
 - `make watch`: Similar to `make` above, but runs in the background and listens for changes. When
   changes are detected, the bundle is live-updated. Each module is still transformed through Babel,
   but Watchify is used to listen and live-update bundles.
+- `make build-release`: Create a new production build of the `TARGET`. Code can be optionally
+  minified with uglifyjs.
 - `make clean`: Remove the bundle from disk.
 - `make clean-all`: Remove the bundle, all dependencies, and configuration from disk.
 
