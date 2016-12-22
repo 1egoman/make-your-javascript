@@ -4,7 +4,7 @@
 # CONFIGURABLE BUILD OPTIONS
 # ------------------------------------------------------------------------------
 TARGET=bundle.js # the output of the compiled code will go here.
-SRCS=$(shell ls src/*.js) # where to fetch input code that will be bundled
+ENTRY=src/app.js # where to fetch input code that will be bundled
 
 # Which babel transforms to use when bundling
 TRANSFORMS := es2015
@@ -59,11 +59,11 @@ node_modules/babel-preset-%:
 
 
 .PHONY: build
-build: $(SRCS) node_modules $(BROWSERIFY) transforms
+build: $(ENTRY) node_modules $(BROWSERIFY) transforms
 	$(BROWSERIFY) $(FLAGS) -o $(TARGET) -- $<
 
 .PHONY: watch
-watch: $(SRCS) node_modules $(WATCHIFY) transforms
+watch: $(ENTRY) node_modules $(WATCHIFY) transforms
 	$(WATCHIFY) --verbose $(FLAGS) -o $(TARGET) -- $<
 
 
