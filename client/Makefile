@@ -11,6 +11,18 @@ TRANSFORMS := es2015
 
 # Additional flags to pass to either browserify or watchify when compiling.
 FLAGS=
+PRODUCTION_FLAGS=
+
+# ----------------------------------------------------------------------------
+# PRODUCTION BUILD SETTINGS
+# ----------------------------------------------------------------------------
+MINIFY=1 # should code be minified with uglify when building for production
+
+
+
+ifdef MINIFY
+	PRODUCTION_FLAGS += -g uglifyify
+endif
 
 BROWSERIFY=./node_modules/.bin/browserify
 WATCHIFY=./node_modules/.bin/watchify
@@ -26,7 +38,10 @@ ifdef TRANSFORMS
 	FLAGS += -t [babelify]
 endif
 
-all: build
+
+
+# default to a dev build
+all: build-dev
 
 # Setup the build environment by installing all dependencies, and also
 # install browserify / watchify if they are not installed already.
@@ -50,6 +65,10 @@ node_modules/babelify:
 node_modules/babel-preset-%:
 	npm install --save-dev $(@F)
 
+# install uglifyify for minification
+node_modules/uglifyify:
+	npm install --save-dev uglifyify
+
 # create a babelrc with all the babel transforms specified above.
 # TODO: the below sed hack is horrible. Could and should be made a lot cleaner.
 .babelrc:
@@ -58,9 +77,13 @@ node_modules/babel-preset-%:
 
 
 
-.PHONY: build
-build: $(ENTRY) node_modules $(BROWSERIFY) transforms
+.PHONY: build-dev
+build-dev: $(ENTRY) node_modules $(BROWSERIFY) transforms
 	$(BROWSERIFY) $(FLAGS) -o $(TARGET) -- $<
+
+.PHONY: watch
+build: $(ENTRY) node_modules $(BROWSERIFY) transforms $(MINIFY:1=node_modules/uglifyify)
+	$(BROWSERIFY) $(FLAGS) $(PRODUCTION_FLAGS) -o $(TARGET) -- $<
 
 .PHONY: watch
 watch: $(ENTRY) node_modules $(WATCHIFY) transforms

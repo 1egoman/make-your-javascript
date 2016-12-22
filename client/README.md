@@ -5,6 +5,11 @@ This is a `Makefile` for building javascript code for the frontend. After settin
 variables in the Makefile, (namely, `TARGET` and `ENTRY`), running `make` will self-bootstrap
 Browserify and Babel, build a bundle, and output it to the path `TARGET`.
 
+## What's included:
+- `Browserify`
+- `Babel`
+- `Uglify` (in the package `uglifyify`)
+
 ## Tasks
 - `make`: Create a new build of the `TARGET`. Before bundling, each module is transformed through
   Babel and packaged with Browserify. On first run of `make`, all dependencies that are required for
