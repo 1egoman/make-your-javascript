@@ -22,3 +22,7 @@ Browserify and Babel, build a bundle, and output it to the path `TARGET`.
 - `TRANSFORMS`: A space-seperated list of babel presets to add to the build process. Two of the most
   common are `es2015` (for es2015 syntax) and `react` (for jsx transpilation).
 - `FLAGS`: Any additional flags to pass to Browserify or Watchify when building.
+
+## Source maps
+If you'd like to add source maps to any of the bundles that you're making, append `sourcemap=1` to
+your command. For example, to build a bundle with a sourcemap, run `make sourcemap=1`.
