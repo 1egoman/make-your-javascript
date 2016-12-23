@@ -17,6 +17,13 @@ FLAGS=
 PRODUCTION_FLAGS=
 
 # ----------------------------------------------------------------------------
+# BUILD SASS
+# ----------------------------------------------------------------------------
+SASS_ENTRY=sass/styles.scss
+SASS_TARGET=bundle.css
+SASS_FLAGS=
+
+# ----------------------------------------------------------------------------
 # PRODUCTION BUILD SETTINGS
 # ----------------------------------------------------------------------------
 MINIFY=1 # should code be minified with uglify when building for production?
@@ -43,6 +50,7 @@ endif
 BROWSERIFY=./node_modules/.bin/browserify
 WATCHIFY=./node_modules/.bin/watchify
 NPM=npm
+NODE_SASS=./node_modules/.bin/node-sass
 
 # default to a dev build
 all: build-dev
@@ -55,6 +63,8 @@ $(BROWSERIFY):
 	$(NPM) install --save-dev browserify
 $(WATCHIFY):
 	$(NPM) install --save-dev watchify
+$(NODE_SASS):
+	$(NPM) install --save-dev node-sass
 
 # if babel transforms were specified (and they aren't already installed), install them too.
 
@@ -95,8 +105,13 @@ build-release: $(ENTRY) node_modules $(BROWSERIFY) transforms $($(MINIFY:1=node_
 
 # Watch for changes and make builds on the fly.
 .PHONY: watch
-watch: $(ENTRY) node_modules $(WATCHIFY) transforms
+watch: $(ENTRY) node_modules $(WATCHIFY) transforms $(SASS_ENTRY) $(NODE_SASS)
+	# Make an initial build of the sass, since node-sass --watch won't do this.
+	$(NODE_SASS) --recursive $(SASS_FLAGS) $(SASS_ENTRY) -- $(SASS_TARGET)
+
+	# watch the javascript, sass, and start a web server
 	$(WATCHIFY) --verbose $(FLAGS) -o $(TARGET) -- $< & \
+	$(NODE_SASS) --watch --recursive $(SASS_FLAGS) $(SASS_ENTRY) -- $(SASS_TARGET) & \
 	python -m SimpleHTTPServer $(WATCH_PORT)
 
 
@@ -118,7 +133,7 @@ release: build-release $(PACKAGED_LOCATION) release-copy
 
 .PHONY: clean
 clean:
-	rm -rf $(TARGET) $(PACKAGED_LOCATION)
+	rm -rf $(TARGET) $(PACKAGED_LOCATION) $(SASS_TARGET)
 
 .PHONY: clean-all
 clean-all: clean
