@@ -9,6 +9,9 @@ ENTRY=src/app.js # where to fetch input code that will be bundled
 # Which babel transforms to use when bundling
 TRANSFORMS := es2015
 
+# When building wiht `make watch`, which port to start the server on
+WATCH_PORT=8001
+
 # Additional flags to pass to either browserify or watchify when compiling.
 FLAGS=
 PRODUCTION_FLAGS=
@@ -17,6 +20,7 @@ PRODUCTION_FLAGS=
 # PRODUCTION BUILD SETTINGS
 # ----------------------------------------------------------------------------
 MINIFY=1 # should code be minified with uglify when building for production?
+PACKAGED_LOCATION=bundled/
 
 
 
@@ -70,6 +74,8 @@ node_modules/uglifyify:
 	npm install --save-dev uglifyify
 
 # create a babelrc with all the babel transforms specified above.
+# If a .babelrc already exists, this won't overwrite it (don't worry).
+# So feel free to midify the output of this and commit it if you'd like.
 # TODO: the below sed hack is horrible. Could and should be made a lot cleaner.
 .babelrc:
 	@echo '{"presets": [$(shell echo '$(foreach transform,$(TRANSFORMS),"$(transform)",)' | sed 's/,$$//')]}' > .babelrc
@@ -90,7 +96,20 @@ build-release: $(ENTRY) node_modules $(BROWSERIFY) transforms $($(MINIFY:1=node_
 # Watch for changes and make builds on the fly.
 .PHONY: watch
 watch: $(ENTRY) node_modules $(WATCHIFY) transforms
-	$(WATCHIFY) --verbose $(FLAGS) -o $(TARGET) -- $<
+	$(WATCHIFY) --verbose $(FLAGS) -o $(TARGET) -- $< & \
+	python -m SimpleHTTPServer $(WATCH_PORT)
+
+
+# Targets for building a release
+$(PACKAGED_LOCATION):
+	mkdir -p $(PACKAGED_LOCATION)
+
+# copy all the things into the packaged location
+release-copy:
+	mkdir -p $(basename $(PACKAGED_LOCATION))
+	cp $(TARGET) $(PACKAGED_LOCATION)/$(TARGET)
+
+release: build-release $(PACKAGED_LOCATION) release-copy
 
 
 # The below two targets make clean builds.
@@ -99,8 +118,8 @@ watch: $(ENTRY) node_modules $(WATCHIFY) transforms
 
 .PHONY: clean
 clean:
-	rm -rf $(TARGET)
+	rm -rf $(TARGET) $(PACKAGED_LOCATION)
 
 .PHONY: clean-all
 clean-all: clean
-	rm -rf node_modules/ .babelrc
+	rm -rf node_modules/
