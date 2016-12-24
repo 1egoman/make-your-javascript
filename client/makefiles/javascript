@@ -9,6 +9,7 @@ BROWSERIFY=node_modules/.bin/browserify
 WATCHIFY=node_modules/.bin/watchify
 NPM=npm
 TRANSPILER=$(BROWSERIFY)
+JS_ADDITIONAL_PREREQS=
 
 # Code watching
 ifdef JS_WATCH
@@ -23,14 +24,14 @@ JS_FLAGS += -t [babelify]
 
 # if babel transforms were specified (and they aren't already installed), install them too.
 # This is the collective target for all transform-related stuff.
-js-transforms: node_modules/babelify $(addprefix node_modules/babel-preset-,$(JS_TRANSFORMS)) .babelrc
+JS_ADDITIONAL_PREREQS += node_modules/babelify $(addprefix node_modules/babel-preset-,$(JS_TRANSFORMS)) .babelrc
 endif
 
 # Minification
 # THe process of minifying code requires uglify as a prerequisite.
 ifdef JS_MINIFY
 JS_FLAGS += -g uglifyify
-js-minify: node_modules/uglifyify
+JS_ADDITIONAL_PREREQS += node_modules/uglifyify
 endif
 
 # Source maps
@@ -56,7 +57,7 @@ $(WATCHIFY):
 
 # create a babelrc with all the babel transforms specified above.
 # If a .babelrc already exists, this won't overwrite it (don't worry).
-# So feel free to midify the output of this and commit it if you'd like.
+# So feel free to modify the output of this and commit it if you'd like.
 # TODO: the below sed hack is horrible. Could and should be made a lot cleaner.
 .babelrc:
 	@echo '{"presets": [$(shell echo '$(foreach transform,$(JS_TRANSFORMS),"$(transform)",)' | sed 's/,$$//')]}' > .babelrc
@@ -64,5 +65,5 @@ $(WATCHIFY):
 
 
 # The javascript implicit rule
-%.js: node_modules $(TRANSPILER) js-transforms js-minify
+%.js: node_modules $(TRANSPILER) $(JS_ADDITIONAL_PREREQS)
 	$(TRANSPILER) $(JS_FLAGS) -o $@ -- $(JS_SRC)
