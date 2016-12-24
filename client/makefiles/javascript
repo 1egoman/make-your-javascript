@@ -1,0 +1,68 @@
+# vim: set autoindent noexpandtab tabstop=4 shiftwidth=4 syntax=Make :
+# ------------------------------------------------------------------------------
+# Makefile - Javascript Definitions
+# Tells Make how to implicitly handle javascript files
+# ------------------------------------------------------------------------------
+
+# Define some binary locations
+BROWSERIFY=node_modules/.bin/browserify
+WATCHIFY=node_modules/.bin/watchify
+NPM=npm
+TRANSPILER=$(BROWSERIFY)
+
+# Code watching
+ifdef JS_WATCH
+TRANSPILER=$(WATCHIFY)
+JS_FLAGS += --verbose
+endif
+
+# Babel transforms
+# THe process of babelifying code requires babelify as a prerequisite.
+ifdef JS_TRANSFORMS
+JS_FLAGS += -t [babelify]
+
+# if babel transforms were specified (and they aren't already installed), install them too.
+# This is the collective target for all transform-related stuff.
+js-transforms: node_modules/babelify $(addprefix node_modules/babel-preset-,$(JS_TRANSFORMS)) .babelrc
+endif
+
+# Minification
+# THe process of minifying code requires uglify as a prerequisite.
+ifdef JS_MINIFY
+JS_FLAGS += -g uglifyify
+js-minify: node_modules/uglifyify
+endif
+
+# Source maps
+ifdef JS_SOURCEMAP
+JS_FLAGS += --debug
+endif
+
+
+# Setup the build environment by installing all dependencies, and also
+# install browserify / watchify if they are not installed already.
+node_modules:
+	$(NPM) install
+
+# Tell make how to install things.
+node_modules/%:
+	npm install --save-dev $(@F)
+
+# Tell me how to install binaries that are needed to build code.
+$(BROWSERIFY):
+	npm install --save-dev browserify
+$(WATCHIFY):
+	npm install --save-dev watchify
+
+# create a babelrc with all the babel transforms specified above.
+# If a .babelrc already exists, this won't overwrite it (don't worry).
+# So feel free to midify the output of this and commit it if you'd like.
+# TODO: the below sed hack is horrible. Could and should be made a lot cleaner.
+.babelrc:
+	@echo '{"presets": [$(shell echo '$(foreach transform,$(JS_TRANSFORMS),"$(transform)",)' | sed 's/,$$//')]}' > .babelrc
+
+
+
+# The javascript implicit rule
+%.js: node_modules $(TRANSPILER) js-transforms js-minify
+	$(TRANSPILER) $(JS_FLAGS) -o $@ -- $(JS_SRC)

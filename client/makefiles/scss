@@ -1,0 +1,25 @@
+# vim: set autoindent noexpandtab tabstop=4 shiftwidth=4 syntax=Make :
+# ----------------------------------------------------------------------------
+# BUILD SCSS
+# ----------------------------------------------------------------------------
+
+# Included binaries
+NPM ?= npm
+NODE_SASS=node_modules/.bin/node-sass
+
+# Code minification
+ifdef SCSS_MINIFY
+SCSS_FLAGS += --output-style compressed
+endif
+
+# Code watch
+ifdef SCSS_WATCH
+SCSS_FLAGS += --watch
+endif
+
+$(NODE_SASS):
+	$(NPM) install --save-dev node-sass
+
+# Create a new production build of the given code.
+%.css: $(SCSS_SRC) $(NODE_SASS)
+	$(NODE_SASS) $(SCSS_FLAGS) $< -- $@
