@@ -1,18 +1,25 @@
 # vim: set autoindent noexpandtab tabstop=4 shiftwidth=4 syntax=Make :
+BUNDLES=bundle.js bundle.css
+.PRECIOUS: $(BUNDLES) # maek the above files as the output of the bundling operation
+
 
 # The below says that for the default rule to pass, we need a `bundle.js`.
 # The javascript handler imported above knows how to make javascript files! So it takes over.
 .PHONY: all
-all: bundle.js bundle.css
+all: $(BUNDLES)
 
 # Watch a file, and rebuild it.
 .PHONY: watch
-watch: bundle.js bundle.css
+watch: clean
 	@JS_WATCH=ON SCSS_WATCH=ON make all -j 2
 
 .PHONY: clean
 clean:
-	rm -rf node_modules/ bundle.js bundle.css
+	rm -rf $(BUNDLES)
+
+.PHONY: clean-all
+clean-all: clean
+	rm -rf node_modules/
 
 # tasks that this pulls in:
 # - js-build-dev
@@ -37,6 +44,9 @@ include makefiles/javascript
 
 SCSS_SRC=sass/styles.scss
 SCSS_MINIFY=ON
+SCSS_SOURCEMAP=ON
+#SCSS_WATCH=ON
+SCSS_FLAGS=
 
 # Tells make how to implicitly handle scss files with the above configration
 include makefiles/scss
