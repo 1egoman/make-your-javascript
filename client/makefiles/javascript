@@ -49,6 +49,11 @@ node_modules:
 node_modules/%:
 	npm install --save-dev $(@F)
 
+# Make tries to remove intermediate files, and because all the packages installed in `node_modules`
+# are seen by make as "side effects" we need to add them to the special ".PRECIOUS" target. This
+# target means that the given "side effects" shouldn't be cleaned up after.
+.PRECIOUS: node_modules/%
+
 # Tell me how to install binaries that are needed to build code.
 $(BROWSERIFY):
 	npm install --save-dev browserify
