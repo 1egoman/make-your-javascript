@@ -2,16 +2,15 @@
 BUNDLES=bundle.js bundle.css
 .PRECIOUS: $(BUNDLES) # maek the above files as the output of the bundling operation
 
-
 # The below says that for the default rule to pass, we need a `bundle.js`.
 # The javascript handler imported above knows how to make javascript files! So it takes over.
 .PHONY: all
-all: $(BUNDLES)
+all: $(BUNDLES) server
 
 # Watch a file, and rebuild it.
 .PHONY: watch
 watch: clean
-	@JS_WATCH=ON SCSS_WATCH=ON make all -j 2
+	@JS_WATCH=ON SCSS_WATCH=ON SERVER_ENABLED=ON make all -j 3
 
 .PHONY: clean
 clean:
@@ -50,3 +49,7 @@ SCSS_FLAGS=
 
 # Tells make how to implicitly handle scss files with the above configration
 include makefiles/scss
+
+
+SERVER_PORT=8000
+include makefiles/server

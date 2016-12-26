@@ -1,0 +1,10 @@
+# vim: set autoindent noexpandtab tabstop=4 shiftwidth=4 syntax=Make :
+
+LIVESERVER=node_modules/.bin/live-server
+
+$(LIVESERVER):
+	npm install --save-dev live-server
+
+.PHONY: server
+server: $(LIVESERVER)
+	$(LIVESERVER) --port $(SERVER_PORT) $(SERVER_FLAGS)
