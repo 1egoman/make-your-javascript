@@ -1,0 +1,8 @@
+# vim: set autoindent noexpandtab tabstop=4 shiftwidth=4 syntax=Make :
+
+# Included binaries
+NPM ?= npm
+NUNJUCKS=node_modules/.bin/nunjucks
+
+$(NUNJUCKS):
+	$(NPM) install --save-dev 1egoman/nunjucks-cli

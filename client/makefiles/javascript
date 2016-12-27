@@ -67,8 +67,6 @@ $(WATCHIFY):
 .babelrc:
 	@echo '{"presets": [$(shell echo '$(foreach transform,$(JS_TRANSFORMS),"$(transform)",)' | sed 's/,$$//')]}' > .babelrc
 
-
-
 # The javascript implicit rule
 %.js: node_modules $(TRANSPILER) $(JS_ADDITIONAL_PREREQS)
 	$(TRANSPILER) $(JS_FLAGS) -o $@ -- $(JS_SRC)

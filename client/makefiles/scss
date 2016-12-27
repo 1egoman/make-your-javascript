@@ -26,6 +26,7 @@ $(NODE_SASS):
 	$(NPM) install --save-dev node-sass
 
 # Create a new production build of the given code. Sass watch doesn't generate an initial file, so
-# the conditional makes a build on initial run
+# the conditional makes a build on initial run.
 %.css: $(SCSS_SRC) $(NODE_SASS)
+	$(NODE_SASS) $(SCSS_FLAGS) --watch false -- $< $@
 	$(NODE_SASS) $(SCSS_FLAGS) -- $< $@
